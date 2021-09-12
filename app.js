@@ -4,7 +4,7 @@ const jsonParser = require('body-parser').json()
 
 // Config
 const port = 3000
-const URI = 'mongodb+srv://Despicable:Zhengulov1@cluster0.fcj4x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const URI = 'url'
 
 // Models
 const Users = require('./models/Users.js')
@@ -24,11 +24,11 @@ sendError = (res, status, err) => {
 // Connection
 mongoose.connect(URI, {useNewUrlParser: true, useUnifiedTopology: true})
   .then((result => console.log('connected to db')))
-  .catch(err => console.error(err))
+  .catch(err => console.log(err))
 
 // --API--
 // Creating new User
-app.post('/addUser', jsonParser, (req, res) => {
+app.post('/addUser', jsonParser, async (req, res) => {
   Users.create({
     email: req.body.email,
     score: 0
@@ -38,28 +38,27 @@ app.post('/addUser', jsonParser, (req, res) => {
 })
 
 // getUsers
-app.post('/getUsers', jsonParser, (req, res) => {
-  Users.find({}, 'email score', (err, query) => {
-    sendJSON(res, 200, query)
-  }).catch(err => sendError(res, 500, err))
+app.get('/getUsers', jsonParser, async (req, res) => {
+  Users.find({}, "email score")
+  .then(query => sendJSON(res, 200, query))
+  .catch(err => sendError(res, 500, err))
 })
 
 // getUser
-app.post('/getUser', jsonParser, (req, res) => {
-  Users.findOne({email: req.body.email}, 'email score', (err, query) => {
-    sendJSON(res, 200, query)
-  }).catch(err => sendError(res, 500, err))
+app.post('/getUser', jsonParser, async (req, res) => {
+  Users.findOne({email: req.body.email}, "email score")
+  .then(query => sendJSON(res, 200, query))
+  .catch(err => sendError(res, 500, err))
 })
 
 // changeScore
-app.post('changeScore', jsonParser, (req, res) => {
+app.post('/changeScore', jsonParser, async (req, res) => {
   Users.findOneAndUpdate(
     {email: req.body.email}, 
     {score: req.body.score}, 
-    {useFindAndModify: false, new: true},
-    (err, query) => {
-      sendJSON(res, 200, query)
-    }).catch(err => sendError(res, 500, err))
+    {useFindAndModify: false, new: true})
+    .then(query => sendJSON(res, 200, query))
+    .catch(err => sendError(res, 500, err))
 })
 
 // Not Found
